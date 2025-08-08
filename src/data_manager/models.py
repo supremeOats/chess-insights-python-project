@@ -78,14 +78,25 @@ class Profile(db.Model):
         """
 
 class ColorPlayer(db.Model):
-    username = db.Column(db.String, db.ForeignKey('profiles.username'), primary_key=True)
+    __tablename__ = 'colorPlayer'
+
+    id = db.Column(db.Integer, primary_key=True)
+    
+    game = db.Column(db.String, db.ForeignKey('games.url'), nullable=False)
+
+    username = db.Column(db.String, db.ForeignKey('profiles.username'))
     rating = db.Column("rating", db.Integer)
     result = db.Column("result", db.String)
+    accuracy = db.Column("accu_white", db.Float)
+    color = db.Column("color", db.String)
 
-    def __init__(self, username: str, rating: int, result: str) -> None:
-        self.username = username
-        self.rating = rating
-        self.result = result
+    def __init__(self, player: dict[str, Any]):
+        self.game = player["game"]
+        self.username = player["username"]
+        self.rating = player["rating"]
+        self.result = player["result"]
+        self.accuracy = player["accuracy"]
+        self.color = player["color"]
         
 DEFAULT_STR = "N/A"
 
@@ -102,7 +113,8 @@ class Archive(db.Model):
     def __init__(self, username: str, year: int, month: int, json_obj: dict[str, Any]) -> None:
         self.username = username
         self.period = dt.datetime(year, month, 1)
-        self.games = json_obj["games"]
+        #self.games = json_obj["games"]
+        self.games = [Game(game) for game in json_obj["games"]]
 
     def to_json(self):
         return {
@@ -125,35 +137,75 @@ class Game(db.Model):
     #Play info
     fen = db.Column("fen", db.String)
     pgn = db.Column("pgn", db.String)
-    accuracy_white = db.Column("accu_white", db.Float)
-    accuracy_black = db.Column("accu_black", db.Float)
     eco = db.Column("eco", db.String)
 
     #Players info
-    white = db.Column("white", db.String) #ColorPlayer
-    black = db.Column("black", db.String) #ColorPlayer
-
+    white_id = db.Column(
+        db.String,
+        db.ForeignKey(ColorPlayer.id, name="white_name"),
+        nullable=False
+    )
+    
+    black_id = db.Column(
+        db.String,
+        db.ForeignKey(ColorPlayer.id, name="black_name"),
+        nullable=False
+    )
+    
+    white = db.relationship(
+        "ColorPlayer",
+        foreign_keys=[white_id],
+    )
+    
+    black = db.relationship(
+        "ColorPlayer",
+        foreign_keys=[black_id],
+    )
+    
     tournament = db.Column("tournament_url", db.String) #optional
     match = db.Column("match_url", db.String) #optional
 
     #Archive
-    archive_id = db.Column(db.Integer, db.ForeignKey(Archive.id, name="game_archive"), nullable=False)
-    archive = db.relationship('Archive', back_populates='games')
+    archive_id = db.Column(
+        db.Integer,
+        db.ForeignKey(Archive.id, name="game_archive"),
+        nullable=False
+    )
+    
+    archive = db.relationship(
+        'Archive',
+        back_populates='games'
+    )
 
     def __init__(self, game: dict[str, Any]):
         self.url = game["url"]
-        self.start_time = game.setdefault("start_time", 0)
-        self.end_time = game["end_time"]
+        self.start_time = dt.datetime.fromtimestamp(game.setdefault("start_time", 0))
+        self.end_time = dt.datetime.fromtimestamp(game["end_time"])
         self.time_control = game["time_control"]
         self.rules = game["rules"]
 
         self.fen = game["fen"]
         self.pgn = game["pgn"]
-        self.accuracies = game["accuracies"]
-        self.eco = game.setdefault("eco", DEFAULT_STR)
 
-        self.white = game["white"]
-        self.black = game["black"]
+        white_dict = game["white"]
+        white_dict["color"] = "white"
+        white_dict["game"] = self.url
+        
+        black_dict = game["black"]
+        black_dict["color"] = "black"
+        black_dict["game"] = self.url
+
+        if("accuracies" in game):
+            white_dict["accuracy"] = game["accuracies"]["white"]
+            black_dict["accuracy"] = game["accuracies"]["black"]
+        else:
+            white_dict["accuracy"] = -1
+            black_dict["accuracy"] = -1
+
+        self.white = ColorPlayer(white_dict)
+        self.black = ColorPlayer(black_dict)
+        
+        self.eco = game.setdefault("eco", DEFAULT_STR)
 
         self.tournament = game.setdefault("tournament", DEFAULT_STR)
         self.match = game.setdefault("match", DEFAULT_STR)
