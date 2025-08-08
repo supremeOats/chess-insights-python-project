@@ -1,0 +1,96 @@
+from player_profile import Profile
+import datetime as dt
+import json
+from typing import Any, TextIO
+from enum import Enum
+
+DEFAULT_STR = "N/A"
+
+class GameResult(Enum):
+    Win = "win"
+    Checkmated = "checkmated"
+    
+    DrawAgreed = "agreed"
+    DrawRepetition = "repetition"
+    DrawFiftyMove = "50move"
+    DrawTimeout = "timeout"
+    Stalemate = "stalemate"
+    
+    Timeout = "timeout"
+    Resigned = "resigned"
+    InsufficientMaterial = "insufficient"
+    OpponentKingOfTheHill = "kingofthehill"
+    ThreeCheck = "threecheck"
+
+class ColorPlayer:
+    username: str
+    rating: int
+    result: GameResult
+
+    def __init__(self, player: dict[str, Any]):
+        self.username = player["username"]
+        self.rating = player["rating"]
+        self.result = player["result"]
+
+class Game:
+    #Basic information
+    url: str
+    start_time: dt.datetime #optional
+    end_time: dt.datetime
+    time_control: str
+    rules: str
+
+    #Play info
+    fen: str
+    pgn: str
+    accuracies = { "white": float, "black": float}
+    eco: str #optional
+
+    #Players info
+    white: ColorPlayer
+    black: ColorPlayer
+
+    tournament: str #optional
+    match: str #optional
+
+    def __init__(self, json_obj: dict[str, Any]):
+        self.url = json_obj["url"]
+        self.start_time = json_obj.setdefault("start_time", 0)
+        self.end_time = json_obj["end_time"]
+        self.time_control = json_obj["time_control"]
+        self.rules = json_obj["rules"]
+
+        self.fen = json_obj["fen"]
+        self.pgn = json_obj["pgn"]
+        self.accuracies = json_obj["accuracies"]
+        self.eco = json_obj.setdefault("eco", DEFAULT_STR)
+
+        self.white = json_obj["white"]
+        self.black = json_obj["black"]
+
+        self.tournament = json_obj.setdefault("tournament", DEFAULT_STR)
+        self.match = json_obj.setdefault("match", DEFAULT_STR)
+
+    def result(self) -> str:
+        return "white wins" if self.white.result == "win" else "black wins" if self.black.result == "win" else "draw"
+    
+class Archive:
+    username: str
+    period: dt.datetime
+    games: list[Game]
+
+    def __init__(self, username: str, year: int, month: int, json_obj: dict[str, Any]) -> None:
+        self.username = username
+        self.period = dt.datetime(year, month, 1)
+        self.games = json_obj["games"]
+        
+    def to_json(self):
+        return {
+            "username": self.username,
+            "year": self.period.year,
+            "month": self.period.month,
+            "games": self.games
+        }
+
+    def dump(self, file: TextIO) -> None:
+        json.dump(self.to_json(), file)

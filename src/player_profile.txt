@@ -1,0 +1,71 @@
+from typing import Any, TextIO
+from enum import Enum
+import json
+import datetime as dt
+
+
+class MasterTitle(Enum):
+    GM = "GM"
+    WGM = "WGM"
+    IM = "IM"
+    WIM = "WIM"
+    FM = "FM"
+    WFM = "WFM"
+    NM = "NM"
+    WNM = "WNM",
+    CM = "CM"
+    WCM = "WCM"
+    NONE = "N/A"
+
+    def __str__(self):
+        return self.name
+
+class Profile:
+    username: str
+    name: str
+    id: int
+
+    title: MasterTitle
+    rating: int
+
+    pfp_url: str
+    country: str
+    joined: dt.datetime
+
+    api_url: str
+    url: str
+    
+    def __init__(self, json_obj: dict[str, Any]) -> None:
+        #validate_json
+        self.username = json_obj["username"]
+        self.name = json_obj.setdefault("name", "N/A")
+        self.id = json_obj["player_id"]
+        self.title = json_obj.setdefault("title", MasterTitle.NONE)
+        #self.rating = json_obj["fide"]
+        self.pfp_url = json_obj.setdefault("avatar", "N/A")
+        self.country = json_obj["country"]
+        self.joined = dt.datetime.fromtimestamp(json_obj["joined"])
+        self.api_url = json_obj["@id"]
+        self.url = json_obj["url"]
+
+    def from_json(self, json_obj: dict[str, Any]):
+        ...
+
+    def to_json(self):
+        return {
+            "@id": self.api_url,
+            "url": self.url,
+            "username": self.username,
+            "player_id": self.id,
+            "title": self.title.__str__(),
+            "name": self.name,
+            "avatar": self.pfp_url,
+            "country": self.country,
+            "joined": self.joined.timestamp()
+        }
+    
+    def from_api(self, json_obj: dict[str, Any]):
+        ...
+
+    def dump(self, file: TextIO):
+        json.dump(self.to_json(), file)
