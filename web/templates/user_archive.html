@@ -3,31 +3,93 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{profile.username}}'s archive for {archive.period.month}/{archive.period.year}</title>
+        <title>{{profile.username}} {{archive.period.month}}.{{archive.period.year}}</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+        <!-- Includes all JS & CSS for the JavaScript Data Grid -->
+        <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+        <!-- DataTables -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css">
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+
+        <!-- Table Styling -->   
+        <style>
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+                }
+
+                th {
+                background-color: rgb(66, 116, 84);
+                color: white;
+                }
+
+                td, th {
+                border: 1px solid rgb(0, 0, 0);
+                text-align: center;
+                padding: 8px;
+                }
+
+                tr:nth-child(even) {
+                background-color: rgb(125, 200, 153);
+            }
+            
+            tr:hover{
+                background-color: rgb(205, 237, 225);
+            }
+
+            a {
+                color: green
+            }
+        </style>
     </head>
+    
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">Chess.com Insights</a>
+                <a class="navbar-brand" href="/home">Chess.com Insights</a>
             </div>
         </nav>
+        
         <div class="container mt-5">
-            <h1>{{profile.username}}!</h1>
-
-            <div id="games-table">
-                <table id="html-games-table">
+            <h1><a href="/profiles/{{profile.username}}">{{profile.username}}</a>'s games for {{archive.period.strftime("%B")}} {{archive.period.year}}</h1>
+            
+            <table id="archive" class="display stripe hover">
+                <thead>
                     <tr>
                         <th>Date</th>
+                        <th>White</th>
+                        <th>Rating</th>
+                        <th>Black</th>
+                        <th>Rating</th>
                         <th>Winner</th>
-                        <th>Accuracy (white)</th>
-                        <th>Accuracy (black)</th>
-                        <th>URL</th>
                     </tr>
-                </table>
-            </div>
-
+                </thead>
+                <tbody>
+                    {% for game in archive.games %}
+                    <tr>
+                        <td>{{ game.end_time.date() }}</td>
+                        <td>{{ game.white.username }}</td>
+                        <td>{{ game.white.rating }}</td>
+                        <td>{{ game.black.username }}</td>
+                        <td>{{ game.black.rating }}</td>
+                        <td>{{ game.result() }}</td>
+                    </tr>                        
+                    {% else %}
+                        <td>No games found.</td>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        
+        <script>
+            let table = new DataTable('#archive');
+            new DataTable.Responsive(table);
+        </script>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

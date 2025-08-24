@@ -1,6 +1,52 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <style>
+            .custom-navbar {   
+                nav ul {
+                    list-style-type: none;
+                    margin: 0;
+                    padding: 0;
+                    overflow: hidden;
+                    background-color: #56a054;
+                }
+                
+                nav li {
+                    float:left;
+                    color: white;
+                }
+                
+                nav li a {
+                    display: block;
+                    color: white;
+                    text-align: center;
+                    padding: 14px 16px;
+                    text-decoration: none;
+                }
+            }
+
+            nav li a:hover {
+                background-color: #467344;
+            }
+        </style>
+    </head>
     <body>
+         <div class="custom-navbar">    
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="/search">Search</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a  href="#">About</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="container mt-5">
+            <h1 class="mb-4">Welcome to Chess.com Data Insights</h1>
+            <p class="lead">Analyze and visualize your chess.com data with ease.</p>
+        </div>
+
         <p>Page can't be found :(</p>
     </body>
 </html>

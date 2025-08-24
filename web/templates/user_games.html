@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Includes all JS & CSS for the JavaScript Data Grid -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+
+    <!-- Table Styling -->   
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            }
+
+            th {
+            background-color: rgb(66, 116, 84);
+            color: white;
+            }
+
+            td, th {
+            border: 1px solid rgb(0, 0, 0);
+            text-align: center;
+            padding: 8px;
+            }
+
+            tr:nth-child(even) {
+            background-color: rgb(125, 200, 153);
+
+            tr:hover{
+            background-color: rgb(205, 237, 225);
+        }
+        }
+
+        a {
+            color: green
+        }
+    </style>
+
+    <style>
+        .custom-navbar {   
+            nav ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #56a054;
+            }
+            
+            nav li {
+                font-family: Arial, Helvetica, sans-serif;
+                float:left;
+                color: white;
+            }
+            
+            nav li a {
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+        }
+
+        nav li a:hover {
+            background-color: #467344;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="custom-navbar">    
+        <nav>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a  href="#">About</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div>
+        <table id="analysis">
+            <th># of played games</th>
+            <th># of won games</th>
+            <th>% of won games</th>
+            <th>Avg. accuracy</th>
+            <th>Most common opeining</th>
+            
+            <tr>
+                <td>{{analysis.games_count}}</td>
+                <td>{{analysis.won_games}}</td>
+                <td>{{analysis.win_rate}}%</td>
+                <td>{{analysis.average_accuracy}}</td>
+                <td>{{analysis.openings[0]}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div>
+        <table id="games" class="display stripe hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>White</th>
+                    <th>Rating</th>
+                    <th>Accuracy</th>
+                    <th>Black</th>
+                    <th>Rating</th>
+                    <th>Accuracy</th>
+                    <th>Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                <tr>
+                    <td>{{ game.end_time.date() }}</td>
+                    <td>{{ game.white.username }}</td>
+                    <td>{{ game.white.rating }}</td>
+                    {% if game.white.accuracy >= 0 %}
+                        <td>{{ game.white.accuracy }}</td>
+                    {% else %}
+                        <td>N/A</td>
+                    {% endif %}
+                    <td>{{ game.black.username }}</td>
+                    <td>{{ game.black.rating }}</td>
+                    {% if game.white.accuracy >= 0 %}
+                        <td>{{ game.black.accuracy }}</td>
+                    {% else %}
+                        <td>N/A</td>
+                    {% endif %}
+                    <td>{{ game.result() }}</td>
+                </tr>                        
+                {% else %}
+                    <td>No games found.</td>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <form action="/profiles/{{username}}/games" method="post">
+        <label>Start Date: <input type="date" name="start_date"></label><br>
+        <label>End Date: <input type="date" name="end_date"></label><br>
+        <label>Opponent: <input type="text" name="opponent"></label><br>
+        <label>Min Accuracy: <input type="number" name="min_accuracy" step="0.1"></label><br>
+        <label>Max Accuracy: <input type="number" name="max_accuracy" step="0.1"></label><br>
+        <label>Result: <input type="text" name="result"></label><br>
+        </label><br>
+        <button type="submit">Search</button>
+    </form>
+
+    <script>
+        let table = new DataTable('#games');
+        new DataTable.Responsive(table);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

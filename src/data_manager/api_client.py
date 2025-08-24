@@ -36,8 +36,14 @@ def fetch_archive_from_api(username: str, year: int, month: int) -> Archive:
     
     period = datetime.datetime(year, month, 1)
 
+    archive_url = f'{PROFILE_URL_BASE}/{username}/games/{period.year}/'
+    if month < 10:
+        archive_url += f"0{period.month}"
+    else:
+        archive_url += f"{period.month}"
+
     response = requests.get(
-        f'{PROFILE_URL_BASE}/{username}/games/{period.year}/{period.month}',
+        archive_url,
         headers=USER_AGENT_DATA)
     
     if response.status_code == 404:

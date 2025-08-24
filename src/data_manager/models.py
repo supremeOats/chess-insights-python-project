@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 from typing import Any
 import datetime as dt
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 db = SQLAlchemy()
 
@@ -41,7 +42,7 @@ class Profile(db.Model):
 
     def __init__(self, player: dict[str, Any]) -> None:
         #validate_json
-        self.username = player["username"]
+        self.username = player["username"].lower()
         self.name = player.setdefault("name", "N/A")
         self.id = player["player_id"]
         self.title = player.setdefault("title", str(MasterTitle.NONE))
@@ -92,7 +93,7 @@ class ColorPlayer(db.Model):
 
     def __init__(self, player: dict[str, Any]):
         self.game = player["game"]
-        self.username = player["username"]
+        self.username = player["username"].lower()
         self.rating = player["rating"]
         self.result = player["result"]
         self.accuracy = player["accuracy"]
@@ -103,18 +104,22 @@ DEFAULT_STR = "N/A"
 class Archive(db.Model):
     __tablename__ = 'archives'
 
-    id = db.Column(db.Integer, primary_key=True)
-
+    id       = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, db.ForeignKey('profiles.username'))
-    period = db.Column("period", db.Date)
+    period   = db.Column("period", db.Date)
 
-    games = db.relationship('Game', back_populates='archive', cascade="all, delete-orphan")
-   
+    games: Mapped[list['Game']] = relationship('Game', back_populates='archive', cascade="all, delete-orphan")
+
     def __init__(self, username: str, year: int, month: int, json_obj: dict[str, Any]) -> None:
         self.username = username
         self.period = dt.datetime(year, month, 1)
-        #self.games = json_obj["games"]
-        self.games = [Game(game) for game in json_obj["games"]]
+        
+        for game_data in json_obj["games"]:
+            game = db.session.get(Game,game_data["url"])
+            if game is None:
+                game = Game(game_data)
+
+            self.games.append(game)
 
     def to_json(self):
         return {
@@ -128,11 +133,11 @@ class Game(db.Model):
     __tablename__ = 'games'
 
     #Basic information
-    url = db.Column("url", db.String, primary_key=True)
-    start_time = db.Column("start_time", db.DateTime) #optional
-    end_time = db.Column("end_time", db.DateTime)
-    time_control = db.Column("time_control", db.String)
-    rules = db.Column("rules", db.String)
+    url             = db.Column("url", db.String, primary_key=True)
+    start_time      = db.Column("start_time", db.DateTime) #optional
+    end_time        = db.Column("end_time", db.DateTime)
+    time_control    = db.Column("time_control", db.String)
+    rules           = db.Column("rules", db.String)
 
     #Play info
     fen = db.Column("fen", db.String)
@@ -211,4 +216,4 @@ class Game(db.Model):
         self.match = game.setdefault("match", DEFAULT_STR)
 
     def result(self) -> str:
-        return "white wins" if self.white.result == "win" else "black wins" if self.black.result == "win" else "draw"
+        return f"{self.white.username} (white)" if self.white.result == "win" else f"{self.black.username} (black)" if self.black.result == "win" else "draw"
