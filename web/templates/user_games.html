@@ -114,6 +114,7 @@
                     <th>Rating</th>
                     <th>Accuracy</th>
                     <th>Winner</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -135,6 +136,13 @@
                         <td>N/A</td>
                     {% endif %}
                     <td>{{ game.result() }}</td>
+                    <td>
+                        <form action="{{ url_for('to_replay') }}" method="post">
+                            <input type="hidden" name="pgn" value="{{ game.pgn }}">
+                            <input type="hidden" name="url" value="{{ game.url }}">
+                            <input type="submit" value="Replay">
+                        </form>
+                    </td>
                 </tr>                        
                 {% else %}
                     <td>No games found.</td>

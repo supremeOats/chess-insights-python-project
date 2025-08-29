@@ -100,3 +100,19 @@ def parse_date(date_str: str | None) -> date | None:
     
     (y, m, d) = date_str.split('-')
     return date(int(y), int(m), int(d))
+
+def get_game_id(game_url: str) -> str:
+    """
+    Return the game id, proved the chess.com url for that game.
+    The return value is a string.
+    """
+
+    import re
+    pattern = r"https://www\.chess\.com/game/live/(\d+)"
+    match = re.search(pattern, game_url)
+
+    if match is None:
+        raise ValueError("Invalid game link")
+    
+    return match.group(1)
+

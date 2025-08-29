@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+      <link rel="stylesheet"
+            href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css"
+            integrity="sha384-q94+BZtLrkL1/ohfjR8c6L+A6qzNH9R2hBLwyoAfu3i/WCvQjzL2RQJ3uNHDISdU"
+            crossorigin="anonymous">
+      </link>
+
+      <style>
+            .chessboard {
+                  padding: 10px;
+                  border: 3px solid green;
+            }
+            .controls {
+                  display: grid;
+                  place-items: center;
+                  height: 500px;
+                  border: 3px solid green;
+            }
+
+      </style>
+</head>
+
+<body>
+      <div id="myBoard" style="width: 400px">
+      </div>
+
+      <script src="{{ url_for('static', filename='lib/jquery/jquery-3.7.1.js') }}"></script>
+
+      <script src="{{ url_for('static', filename='lib/chessboardjs-1.0.0/js/chessboard-1.0.0.js') }}"></script>
+      
+      <script>
+            var i = '10';
+            var board = Chessboard('myBoard', 'start')
+            board.move('{{ moves[i] }}')
+      </script>
+
+      <div>
+            <button><<</button>
+            <button><</button>
+            <input type="text" size="1">
+            /{{ moves.__len__() }}
+            <button>></button>
+            <button>>></button>
+      </div>
+
+</body>
+
+</html>
