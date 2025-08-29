@@ -19,4 +19,5 @@ The database should set up automatically
 http://127.0.0.1:5000/profiles/magnuscarlsen/games
 
 **Note:** When a user profile or a game is loaded for the first time it is fetched by the chess.com API, then it is saved to the local database, so the first time a user or games are loaded it may take a little bit more time.
+
 **Note** The front-end of the replay system is not yet implemented
