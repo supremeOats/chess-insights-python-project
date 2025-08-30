@@ -16,7 +16,7 @@ The database should set up automatically
 - An example of the replay system can be seen by clicking on the "Replay" button of a game entry on the game list page
 
 **Example page:**
-http://127.0.0.1:5000/profiles/magnuscarlsen/games
+http://[host]/profiles/magnuscarlsen/games
 
 **Note:** When a user profile or a game is loaded for the first time it is fetched by the chess.com API, then it is saved to the local database, so the first time a user or games are loaded it may take a little bit more time.
 
